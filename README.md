@@ -69,13 +69,6 @@ Example:
   ]
 }
 ```
-
-Optional environment variables:
-```bash
-TORRENT_UI_PORT=5050
-TORRENT_UI_SECRET="change-me"
-```
-
 ---
 
 ## 🧠 Usage
@@ -85,26 +78,6 @@ TORRENT_UI_SECRET="change-me"
 4. Filter, sort, and select torrents  
 5. Click **Delete** → confirm  
    - Toggle **Also delete files** if desired
-
----
-
-## 🔧 Troubleshooting
-| Issue | Fix |
-|-------|-----|
-| Scan does nothing | Check client URL/credentials |
-| 401/403 | Wrong password or Web UI disabled |
-| SSL errors | Set `"verify_ssl": false` in config |
-| Port in use | Change `TORRENT_UI_PORT` |
-
----
-
-## 🧰 Run on Boot
-**Linux (systemd)**  
-Create `/etc/systemd/system/torrent-checker.service` and enable it.
-
-**Windows (NSSM)**  
-Path: `.venv\Scripts\python.exe`  
-Args: `torrent_check.py`
 
 ---
 
