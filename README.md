@@ -76,7 +76,7 @@ Environment variables:
 ## Tips
 
 - Use "Hide Soft" toggle to focus on torrents that need immediate attention
-- Check "Shared ×N" badges before deleting to avoid removing files used by other torrents
+- "Shared ×N" badges let you know that other torrents are using the same file as the one you might want to delete
 - Enable "Compact" mode for a denser view when managing many torrents
 
 ---
