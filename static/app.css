@@ -248,6 +248,26 @@ body.obfuscate-urls input[name="base_url"]::placeholder {
   text-shadow: none;
 }
 
+/* Obfuscate tracker column in results table */
+#resultsTable tbody td:nth-child(3) {
+  position: relative;
+}
+
+body.obfuscate-urls #resultsTable tbody td:nth-child(3) {
+  color: transparent !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  user-select: none;
+}
+
+body.obfuscate-urls #resultsTable tbody td:nth-child(3)::after {
+  content: '••••••••••••••••';
+  color: rgba(255, 255, 255, 0.6);
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 #obfuscateBtn {
   padding: 0.15rem 0.45rem;
 }
