@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>{{ title }}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='app.css') }}" rel="stylesheet"/>
+</head>
+<body>
+<div class="header">
+  <div class="d-flex align-items-center gap-2">
+    <h3 class="m-0">
+      <svg class="logo-icon" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1h-4z"/>
+      </svg>
+      <span class="app-title">{{ title }}</span>
+    </h3>
+    <button class="btn btn-primary btn-sm" id="scanBtn" type="button">Scan All</button>
+    <button class="btn btn-success btn-sm" id="toggleAddClientBtn" type="button">+ Client</button>
+    <button class="btn btn-outline-secondary btn-sm" id="densityBtn" type="button">Compact</button>
+    <span class="badge text-bg-secondary ms-2" id="lastScan">Last: —</span>
+    <div class="scan-progress-container d-none" id="scanProgressContainer">
+      <div class="scan-progress-bar" id="scanProgressBar">
+        <span class="scan-progress-text" id="scanProgressText">0%</span>
+      </div>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" id="obfuscateBtn" type="button" title="Hide URLs">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Add Client Card -->
+<div class="card mb-3 d-none" id="addClientCard">
+  <div class="card-body">
+    <h5 class="card-title">Add Torrent Client</h5>
+    <form id="addClientForm">
+      <div class="row g-2">
+        <div class="col-md-2">
+          <label class="form-label">Client Type</label>
+          <select class="form-select form-select-sm" name="type" required>
+            <option value="qbittorrent">qBittorrent</option>
+            <option value="deluge">Deluge</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Display Name</label>
+          <input class="form-control form-control-sm" name="name" type="text" required placeholder="My qBittorrent"/>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Base URL</label>
+          <input class="form-control form-control-sm" name="base_url" type="url" required placeholder="http://localhost:8080"/>
+        </div>
+      </div>
+      <div class="row g-2 mt-1">
+        <div class="col-md-2">
+          <label class="form-label">Username</label>
+          <input class="form-control form-control-sm" name="username" type="text" id="addClientUsername" placeholder="admin"/>
+          <div class="form-text" id="usernameHelp"></div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Password</label>
+          <input class="form-control form-control-sm" name="password" type="password" id="addClientPassword"/>
+          <div class="form-text" id="passwordHelp"></div>
+        </div>
+        <div class="col-auto">
+          <label class="form-label">&nbsp;</label>
+          <div class="d-flex align-items-center" style="height: 31px;">
+            <div class="form-check me-2">
+              <input class="form-check-input" type="checkbox" name="verify_ssl" id="verifySsl"/>
+              <label class="form-check-label" for="verifySsl">Verify SSL</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Add Client</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Clients Table -->
+<div class="card mb-3" id="clientsCard">
+  <div class="card-body p-0">
+    <h5 class="card-title collapsible-header" id="clientsHeader">
+      <span class="collapse-icon">▼</span> Configured Clients
+      <button class="btn btn-danger btn-sm d-none ms-3" id="deleteClientsBtn" type="button">Delete Selected</button>
+    </h5>
+    <div id="clientsTableContainer">
+      <table class="table table-sm mb-0" id="clientsTable">
+        <thead>
+          <tr>
+            <th class="select-client">
+              <input type="checkbox" id="selectAllClients">
+            </th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>URL</th>
+          </tr>
+        </thead>
+        <tbody id="clientsTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Results Container -->
+<div class="card d-none" id="resultsCard">
+  <div class="card-body">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div class="d-flex align-items-center gap-3">
+        <h5 class="card-title mb-0">Failed / Unregistered Torrents</h5>
+        <label class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="hideSoftToggle">
+          <span class="form-check-label">Hide Soft</span>
+        </label>
+        <button class="btn btn-danger btn-sm d-none" id="deleteSelectedBtn" type="button">Delete (0)</button>
+        <label class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="deleteFilesToggle">
+          <span class="form-check-label">Also delete files</span>
+        </label>
+        <button class="btn btn-outline-secondary btn-sm" id="helpBtn" type="button" title="Help">?</button>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="table table-sm results-table" id="resultsTable">
+        <thead>
+          <tr>
+            <th class="select">
+              <input type="checkbox" id="selectAll">
+            </th>
+            <th id="thClient" style="cursor: pointer;">Client ▲</th>
+            <th id="thTracker" style="cursor: pointer;">Tracker</th>
+            <th id="thTorrent" style="cursor: pointer;">Torrent</th>
+            <th id="thError" style="cursor: pointer;">Error Message</th>
+          </tr>
+        </thead>
+        <tbody id="rowsTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Torrent Details Modal -->
+<div class="modal fade" id="torrentDetailsModal" tabindex="-1" aria-labelledby="torrentDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="torrentDetailsModalLabel">Torrent Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Client</th>
+                <th style="width: 35%;">Torrent Name</th>
+                <th style="width: 40%;">Save Path</th>
+                <th style="width: 10%; text-align: center;">Shared File</th>
+              </tr>
+            </thead>
+            <tbody id="modalTorrentsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteConfirmMessage"></p>
+        <div id="softWarning" class="alert alert-warning d-none" role="alert">
+          <strong>⚠️ Warning:</strong> You have selected soft-failed torrents. These typically indicate temporary tracker issues and usually resolve on their own. Consider waiting before deleting.
+        </div>
+        <div id="sharedWarning" class="alert alert-danger d-none" role="alert">
+          <strong>⚠️ Shared Files Warning:</strong> <span id="sharedWarningText"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="helpModalLabel">Feature Guide</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h6><strong>Hide Soft</strong></h6>
+        <p>Filters out soft-failed torrents from the results. Soft failures are temporary tracker issues (timeouts, DNS errors) that typically resolve automatically. Only hard failures (unregistered, deleted, banned) will be shown.</p>
+        
+        <h6 class="mt-3"><strong>Also Delete Files</strong></h6>
+        <p>When enabled, deletes both the torrent and all downloaded files from disk. When disabled, only removes the torrent from your client while keeping the files intact.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
