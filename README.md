@@ -1,90 +1,84 @@
-# Torrent Checker
+# Torrent Health Auditor
 
-A lightweight **Flask web app** to scan your torrent clients (qBittorrent or Deluge) for **unregistered / failed torrents** and optionally delete them (with or without data).
+A lightweight web application that scans your qBittorrent and Deluge clients to identify failed, unregistered, or problematic torrents.
 
----
+## Features
 
-## 🚀 Features
-- Works with **qBittorrent** and **Deluge Web**
-- Sortable + filterable list view
-- Batch select & delete (with optional data removal)
-- Add clients via UI or config file
-- No database — simple `settings.json`
+- **Multi-Client Support** – Connect multiple qBittorrent and Deluge clients simultaneously
+- **Smart Classification** – Distinguishes between hard failures (unregistered, deleted, banned) and soft failures (temporary tracker issues)
+- **Shared File Detection** – Identifies torrents that share the same files to prevent accidental data loss
+- **Bulk Operations** – Delete multiple torrents at once with optional file removal
+- **Real-Time Scanning** – Live progress updates as clients are scanned
+- **Responsive UI** – Clean, dark-themed interface with filtering and sorting
 
----
+## Quick Start
 
-## 🧩 Requirements
-- Python **3.9+**
-- Access to qBittorrent/Deluge Web UI
-- Flask & requests (auto-installed)
+### Requirements
 
----
+- Python 3.7+
+- qBittorrent and/or Deluge with Web UI enabled
 
-## ⚙️ Install & Run
+### Installation
 
-### Windows 11 (PowerShell)
+**Windows:**
 ```powershell
-git clone https://github.com/<you>/<repo>.git
-cd <repo>
-py -3 -m venv .venv
-. .\.venv\Scripts\Activate.ps1
+# Clone or download this repository
+cd torrent-checker
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the application
 python torrent_check.py
 ```
 
-### Linux
+**Linux:**
 ```bash
-git clone https://github.com/<you>/<repo>.git
-cd <repo>
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python torrent_check.py
+# Clone or download this repository
+cd torrent-checker
+
+# Install dependencies
+pip3 install -r requirements.txt
+
+# Run the application
+python3 torrent_check.py
 ```
 
-Then open **http://localhost:5000**
+### Access
 
----
-
-## ⚙️ Configuration
-A `settings.json` file is created on first run.
-
-Example:
-```json
-{
-  "clients": [
-    {
-      "id": "qbit-main",
-      "type": "qbittorrent",
-      "base_url": "http://192.168.1.10:8080",
-      "username": "admin",
-      "password": "pass"
-    },
-    {
-      "id": "deluge-nas",
-      "type": "deluge",
-      "base_url": "http://192.168.1.20:8112",
-      "password": "deluge"
-    }
-  ]
-}
+Open your browser and navigate to:
 ```
+http://localhost:5000
+```
+
+## Usage
+
+1. **Add Clients** – Click "+ Client" and enter your torrent client details
+   - qBittorrent: Provide Web UI URL, username, and password
+   - Deluge: Provide Web UI URL and password
+
+2. **Scan** – Click "Scan All" to check all configured clients
+
+3. **Review Results** – View failed torrents classified as:
+   - **Hard** – Unregistered, deleted, or banned torrents
+   - **Soft** – Temporary tracker issues (usually resolve automatically)
+
+4. **Take Action** – Select torrents and delete them (optionally with files)
+
+## Configuration
+
+The application stores client configurations in `settings.json` (created automatically on first run).
+
+Environment variables:
+- `TORRENT_UI_PORT` – Server port (default: 5000)
+- `TORRENT_UI_SECRET` – Flask secret key (default: dev-secret)
+
+## Tips
+
+- Use "Hide Soft" toggle to focus on torrents that need immediate attention
+- Check "Shared ×N" badges before deleting to avoid removing files used by other torrents
+- Enable "Compact" mode for a denser view when managing many torrents
+
 ---
 
-## 🧠 Usage
-1. Start the app → open browser  
-2. Add clients via **+ Client**  
-3. Click **Scan**  
-4. Filter, sort, and select torrents  
-5. Click **Delete** → confirm  
-   - Toggle **Also delete files** if desired
-
----
-
-## 📜 License
-MIT License
-
----
-
-### ❤️ Credits
-Built for home-lab torrent cleanup — supports qBittorrent & Deluge.
+**Note:** This tool only identifies problems – it does not attempt to fix trackers or re-download torrents.
