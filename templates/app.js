@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     payload.verify_ssl = (fd.get('verify_ssl') === 'on');
     
     try {
-      const res = await fetch('/clients/add', {
+      const res = await fetch('{{ subpath }}/clients/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load and render clients table
   async function loadClients() {
     try {
-      const res = await fetch('/settings_json');
+      const res = await fetch('{{ subpath }}/settings_json');
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       return (data && data.clients) || [];
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     try {
-      const res = await fetch('/clients/delete', {
+      const res = await fetch('{{ subpath }}/clients/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ client_id: clientId })
@@ -796,7 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const errors = [];
         for (const item of itemsToDelete) {
           try {
-            const res = await fetch('/api/torrents/delete', {
+            const res = await fetch('{{ subpath }}/api/torrents/delete', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -902,7 +902,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const errors = [];
       for (const clientId of selectedClients) {
         try {
-          const res = await fetch('/clients/delete', {
+          const res = await fetch('{{ subpath }}/clients/delete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ client_id: clientId })
@@ -956,7 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       console.log('Starting SSE scan with levels:', levels);
       
-      const eventSource = new EventSource(`/scan_stream?levels=${levels}`);
+      const eventSource = new EventSource(`{{ subpath }}/scan_stream?levels=${levels}`);
       let hasReceivedData = false;
       let scanCompleted = false;
       
