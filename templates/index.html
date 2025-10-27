@@ -38,7 +38,7 @@
 <div class="card mb-3 d-none" id="addClientCard">
   <div class="card-body">
     <h5 class="card-title">Add Torrent Client</h5>
-    <form id="addClientForm">
+    <form id="addClientForm" action="{{ subpath }}/clients/add" method="POST">
       <div class="row g-2">
         <div class="col-md-2">
           <label class="form-label">Client Type</label>

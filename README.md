@@ -72,6 +72,7 @@ The application stores client configurations in `settings.json` (created automat
 Environment variables:
 - `TORRENT_UI_PORT` – Server port (default: 5000)
 - `TORRENT_UI_SECRET` – Flask secret key (default: dev-secret)
+- `TORRENT_UI_SUBPATH` - Subpath to serve the app on, if you do not want to use root (default: `none`)
 
 ## Tips
 

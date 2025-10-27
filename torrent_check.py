@@ -19,8 +19,11 @@ APP_TITLE = "Torrent Checker"
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(APP_DIR)
 
-app = Flask(__name__, template_folder="templates", static_folder="static")
+SUBPATH = os.environ.get('TORRENT_UI_SUBPATH', '').rstrip('/')
+app = Flask(__name__, template_folder="templates", static_folder="static", static_url_path=f"{SUBPATH}/static")
 app.secret_key = os.environ.get("TORRENT_UI_SECRET", "dev-secret")
+if SUBPATH:
+    app.config['APPLICATION_ROOT'] = SUBPATH
 
 SETTINGS_PATH = os.path.join(os.path.dirname(__file__), "settings.json")
 DEFAULT_SETTINGS = {"clients": []}
@@ -1313,21 +1316,25 @@ def scan_all_clients_streaming(settings: Dict[str, Any], levels: Set[str]):
 
 # ---------- Flask Routes ----------
 
-@app.get("/favicon.ico")
+@app.get(f"{SUBPATH}/favicon.ico")
 def favicon():
     return ("", 204)
 
-@app.route("/")
+@app.route(f"{SUBPATH}/")
 def index():
     cfgs = parse_clients(load_settings())
     return render_template('index.html', title=APP_TITLE, clients=cfgs)
 
-@app.get("/settings_json")
+@app.get(f"{SUBPATH}/static/app.js")
+def serve_app_js():
+    return render_template('app.js'), 200, {'Content-Type': 'application/javascript'}
+
+@app.get(f"{SUBPATH}/settings_json")
 def get_settings_json():
     settings = load_settings()
     return jsonify(settings)
 
-@app.get("/scan_json")
+@app.get(f"{SUBPATH}/scan_json")
 def scan_json():
     levels_param = request.args.get("levels", "hard,soft")
     levels = set(l.strip().lower() for l in levels_param.split(",") if l.strip())
@@ -1338,7 +1345,7 @@ def scan_json():
     result = scan_all_clients(settings, levels)
     return jsonify(result)
 
-@app.get("/scan_stream")
+@app.get(f"{SUBPATH}/scan_stream")
 def scan_stream():
     levels_param = request.args.get("levels", "hard,soft")
     levels = set(l.strip().lower() for l in levels_param.split(",") if l.strip())
@@ -1364,7 +1371,7 @@ def scan_stream():
         }
     )
 
-@app.post("/clients/add")
+@app.post(f"{SUBPATH}/clients/add")
 def add_client():
     data = request.get_json(silent=True)
     form = data if data else request.form
@@ -1393,7 +1400,7 @@ def add_client():
     save_settings(settings)
     return redirect(url_for("index"))
 
-@app.post("/clients/delete")
+@app.post(f"{SUBPATH}/clients/delete")
 def delete_client():
     data = request.get_json(silent=True) or {}
     client_id = data.get("client_id")
@@ -1415,7 +1422,7 @@ def delete_client():
     
     return jsonify({"ok": True, "message": "Client deleted"})
 
-@app.post("/api/torrents/delete")
+@app.post(f"{SUBPATH}/api/torrents/delete")
 def api_delete_torrent():
     data = request.get_json(silent=True) or {}
     cid = data.get("client_id")
@@ -1450,9 +1457,13 @@ def api_delete_torrent():
     payload = {"ok": ok, "message": msg} if ok else {"ok": False, "error": msg}
     return jsonify(payload), status
 
-@app.get("/__ping")
+@app.get(f"{SUBPATH}/__ping")
 def ping():
     return "ok"
+
+@app.context_processor
+def inject_subpath():
+    return {'subpath': SUBPATH}
 
 if __name__ == "__main__":
     if not os.path.exists(SETTINGS_PATH):
